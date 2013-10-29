@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="bsysconfig">
+	<resultMap id="ConfigResultMap" class="com.ingta.si.admin.entity.BSysconfig">
+		<result column="sysconfigcode" property="sysconfigcode" />
+		<result column="sysconfigname" property="sysconfigname" />
+		<result column="sysconfigvalue" property="sysconfigvalue" />
+		<result column="sfqy" property="sfqy" />
+	</resultMap>
+	
+	<sql id="sql_count">
+		select count(*) 
+    </sql>
+	<sql id="sql_select">
+		select sysconfigcode,sysconfigname,sysconfigvalue,sfqy
+	</sql>
+	<sql id="sql_where">
+		from b_sysconfig
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="sysconfigcode">
+				sysconfigcode=#sysconfigcode#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sysconfigname">
+				sysconfigname=#sysconfigname#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sysconfigvalue">
+				sysconfigvalue=#sysconfigvalue#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="sfqy">
+				sfqy=#sfqy#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<sql id="sql_where_id">
+		from b_sysconfig where sysconfigcode=#value#
+	</sql>
+	<sql id="sql_where_name">
+		from b_sysconfig where sysconfigname=#value#
+	</sql>
+	<insert id="insert" parameterClass="com.ingta.si.admin.entity.BSysconfig">
+		insert into b_sysconfig
+		(sysconfigcode,sysconfigname,sysconfigvalue,sfqy)
+		values
+		(#sysconfigcode#,#sysconfigname#,#sysconfigvalue#,#sfqy#)
+	</insert>
+	<select id="select" resultClass="com.ingta.si.admin.entity.BSysconfig" parameterClass="java.lang.String">
+		<include refid="sql_select" />
+		<include refid="sql_where_id" />
+	</select>
+	<select id="getList" resultClass="com.ingta.si.admin.entity.BSysconfig" parameterClass="java.util.Map">
+		<include refid="sql_select" />
+		<include refid="sql_where" />
+	</select>
+	<select id="count" resultClass="java.lang.Long" parameterClass="java.util.Map">
+		<include refid="sql_count" />
+		<include refid="sql_where" />
+	</select>
+	<select id="validation" resultClass="java.lang.Long" parameterClass="java.lang.String">
+		<include refid="sql_count" />
+		<include refid="sql_where_id" />
+	</select>
+	<update id="update" parameterClass="com.ingta.si.admin.entity.BSysconfig">
+		update b_sysconfig
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="sysconfigcode">
+				sysconfigcode=#sysconfigcode#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="sysconfigname">
+				sysconfigname=#sysconfigname#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="sysconfigvalue">
+				sysconfigvalue=#sysconfigvalue#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="sfqy">
+				sfqy=#sfqy#
+			</isNotEmpty>
+		</dynamic>
+		where sysconfigcode=#sysconfigcode#
+	</update>
+	<update id="updateStatus" parameterClass="java.util.Map">
+		update
+		b_sysconfig
+		set sfqy=#sfqy#
+		where
+		sysconfigcode=#sysconfigcode#
+	</update>
+	<delete id="deleteById" parameterClass="java.lang.String">
+		delete from b_sysconfig where sysconfigcode=#value#
+	</delete>
+</sqlMap>

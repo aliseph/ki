@@ -1,0 +1,79 @@
+@charset "utf-8";
+/* CSS Document */
+* {
+	padding:0;
+	margin:0;
+}
+body {
+	width:100%;
+	background:url(images/bg.jpg) repeat-x;
+	margin:0 auto;
+	font-family:"宋体";
+	font-size:12px;
+}
+img {
+	border:0;
+}
+.clr {
+	clear:both;
+	height: 13px;
+}
+#main {
+	width:769px;
+	height:545px;
+	padding:243px 0 0 248px;
+	position:absolute;
+	left:50%;
+	top:50%;
+	margin-left:-512px;
+	margin-top:-400px;
+}
+.content {
+	background:url(images/hbg.jpg) no-repeat;
+	width:519px;
+	height:366px;
+	padding:30px 0 0 28px;
+	margin-left:10px;
+	margin-top:15px;
+}
+.logo {
+	background:url(images/logo.jpg) no-repeat;
+	width:318px;
+	height:72px;
+}
+.user {
+	width:210px;
+	height:130px;
+	float:left;
+	padding:60px 0 0 110px;
+	line-height:30px;
+	color:#ffffff;
+}
+.user p {
+	height:30px;
+}
+.user input {
+	vertical-align:middle;
+}
+.login {
+	float:left;
+	padding:70px 0 0 15px;
+	width:60px;
+	height:100px;
+}
+.btn {
+	width:65px;
+	height:65px;
+	background:url(images/login.jpg);
+	border:none;
+	color:#ffffff;
+}
+.footer {
+	color:#ffffff;
+	line-height:15px;
+	padding-left:100px;
+}
+
+.hidd{
+	visibility: hidden;
+}

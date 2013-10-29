@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"
+	default-lazy-init="true" default-autowire="byName">
+
+	<description>Spring公共配置 </description>
+	<context:component-scan base-package="com.ingta.si">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<bean id="configBean" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:jdbc.properties" />
+	</bean>
+
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+		destroy-method="close">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="filters" value="stat" />
+		<property name="maxActive" value="20" />
+		<property name="initialSize" value="1" />
+		<property name="maxWait" value="60000" />
+		<property name="minIdle" value="1" />
+		<property name="timeBetweenEvictionRunsMillis" value="3000" />
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<property name="validationQuery" value="SELECT 'x'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+	</bean>
+
+	<bean id="druid-stat-interceptor" class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
+	</bean>
+	<bean id="druid-type-proxyCreator" class="com.alibaba.druid.support.spring.stat.BeanTypeAutoProxyCreator">
+		<property name="targetBeanType" value="com.ingta.framework.ibatis.service.impl.IbatisBaseServiceImpl" />
+		<property name="interceptorNames">
+			<list>
+				<value>druid-stat-interceptor</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations" value="classpath:sql-map-config.xml" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 注入物理分页用的方言，导致分页时不能使用ibatis缓存 -->
+	<bean id="sqlExecutor" class="com.ingta.framework.ibatis.executor.PagingSqlExecutor">
+		<property name="dialect">
+			<bean class="com.ingta.framework.ibatis.dialect.MySQLDialect" />
+		</property>
+	</bean>
+	<bean id="baseDao" abstract="true" class="com.ingta.framework.ibatis.dao.IbatisBaseDao"
+		init-method="initialize">
+		<property name="dataSource" ref="dataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+		<property name="sqlExecutor" ref="sqlExecutor" />
+	</bean>
+	<!-- spring默认注入的为单例，此对象不能为单例，设置为原型 -->
+	<bean id="ibatisDao" class="com.ingta.framework.ibatis.dao.impl.IbatisGenericDaoImpl" parent="baseDao"
+		scope="prototype" />
+	<!-- 注入一些在ibatisBaseService中用到的属性 -->
+	<bean id="constant" class="com.ingta.framework.ibatis.util.SQLConstant">
+		<property name="normal" value="1" />
+		<property name="delete" value="0" />
+		<property name="statusName" value="status" />
+		<property name="monthRange" value="4" />
+		<property name="numPerPage" value="10" />
+	</bean>
+	<!-- 注入数据库中的状态编码 -->
+	<bean id="ibatisBaseService" class="com.ingta.framework.ibatis.service.impl.IbatisBaseServiceImpl"
+		lazy-init="false">
+		<property name="ibatisDao" ref="ibatisDao" />
+		<property name="constant" ref="constant" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 基于cglib的动态代理，实现注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager"
+		proxy-target-class="true" />
+
+	<!-- 国际化的消息资源文件（本系统中主要用于显示/错误消息定制） -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<!-- 在web环境中一定要定位到classpath 否则默认到当前web应用下找 -->
+				<value>classpath:messages</value>
+				<value>classpath:ValidationMessages</value>
+			</list>
+		</property>
+		<property name="useCodeAsDefaultMessage" value="false" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="cacheSeconds" value="60" />
+	</bean>
+
+	<!-- 以下 validator ConversionService 在使用 mvc:annotation-driven 会 自动注册 -->
+	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+		<!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
+		<property name="validationMessageSource" ref="messageSource" />
+	</bean>
+
+	<!-- 缓存注解驱动 -->
+	<cache:annotation-driven />
+	<!-- <cache:annotation-driven cache-manager="cacheManager" proxy-target-class="false" mode="proxy"/> -->
+
+	<!-- cacheManager工厂类 -->
+	<bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+		p:configLocation="classpath:ehcache.xml" p:shared="false" />
+
+	<!-- 声明cacheManager -->
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"
+		p:cacheManager-ref="cacheManagerFactory" />
+</beans>

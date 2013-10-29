@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="admin">
+	<sql id="sql_count">
+		select count(*) 
+    </sql>
+	<sql id="sql_select">
+		select id,account,password,name,status
+	</sql>
+	<sql id="sql_where">
+		from ADMIN
+		<dynamic prepend="where">
+			<isNotEmpty prepend="and" property="id">
+				id=#id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="account">
+				account=#account#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="status">
+				status=#status#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<sql id="sql_where_id">
+		from ADMIN where id=#value#
+	</sql>
+	<sql id="sql_where_account">
+		from ADMIN where account=#value#
+	</sql>
+	<insert id="insert" parameterClass="com.ingta.si.admin.entity.Admin">
+		insert into ADMIN
+		( id,account,password,name,status)
+		values
+		( #id#,#account#,#password#,#name#,#status#)
+	</insert>
+	<select id="select" resultClass="com.ingta.si.admin.entity.Admin" parameterClass="java.lang.String">
+		<include refid="sql_select" />
+		<include refid="sql_where_id" />
+	</select>
+	<select id="getList" resultClass="com.ingta.si.admin.entity.Admin" parameterClass="java.util.Map">
+		<include refid="sql_select" />
+		<include refid="sql_where" />
+	</select>
+	<select id="count" resultClass="java.lang.Long" parameterClass="java.util.Map">
+		<include refid="sql_count" />
+		<include refid="sql_where" />
+	</select>
+	<select id="validation" resultClass="java.lang.Long" parameterClass="java.lang.String">
+		<include refid="sql_count" />
+		<include refid="sql_where_account" />
+	</select>
+	<update id="update" parameterClass="com.ingta.si.admin.entity.Admin">
+		update ADMIN
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="account">
+				account=#account#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="password">
+				password=#password#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="name">
+				name=#name#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="status">
+				status=#status#
+			</isNotEmpty>
+		</dynamic>
+		where id=#id#
+	</update>
+	<update id="updateStatus" parameterClass="java.util.Map">
+		update
+		ADMIN
+		set status=#status#
+		where
+		id=#id#
+	</update>
+	<delete id="deleteById" parameterClass="java.lang.String">
+		delete from ADMIN where id=#value#
+	</delete>
+</sqlMap>
