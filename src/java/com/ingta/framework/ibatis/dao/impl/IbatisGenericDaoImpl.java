@@ -277,7 +277,7 @@ public class IbatisGenericDaoImpl<T, PK> extends IbatisBaseDao implements Ibatis
             try {
                 return BeanUtils.describe(value);
             } catch (Exception e) {
-                logger.error(e);
+                logger.error("bean transfer to map error", e);
             }
         }
         return value;

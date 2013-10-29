@@ -31,7 +31,7 @@ public class SysconfigController extends BaseController {
      * 列出所有配置信息
      */
     @RequestMapping(value = "/list")
-    public String getAllConfig(ModelMap model) throws Exception {
+    public String getAllConfig(ModelMap model) {
         model.addAttribute("configList", sysconfigService.findAll(null));
         return "system/paramList";
     }
@@ -50,13 +50,8 @@ public class SysconfigController extends BaseController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> addConfig(BSysconfig config) {
-        try {
-            sysconfigService.add(config);
-            return DWZResponse.operateOK("configList");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return DWZResponse.operateFail();
-        }
+        sysconfigService.add(config);
+        return DWZResponse.operateOK("configList");
     }
 
     /**
@@ -76,7 +71,7 @@ public class SysconfigController extends BaseController {
     @ResponseBody
     public Map<String, Object> alterConfig(BSysconfig config) {
         sysconfigService.update(config);
-        return DWZResponse.closeCurrent(DWZResponse.OPERATE_OK, "configList");
+        return DWZResponse.closeCurrent("configList");
     }
 
     /**
@@ -95,7 +90,7 @@ public class SysconfigController extends BaseController {
      */
     @RequestMapping(value = "/valiConfig", method = RequestMethod.GET)
     @ResponseBody
-    public boolean valiConfig(String sysconfigcode) throws Exception {
+    public boolean valiConfig(String sysconfigcode) {
         return sysconfigService.validation(sysconfigcode);
     }
 }

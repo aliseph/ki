@@ -10,6 +10,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {
 	private static final Logger logger = LoggerFactory.getLogger(ContextLoaderListener.class);
 
+        @Override
 	public void contextInitialized(ServletContextEvent event) {
 		super.contextInitialized(event);
 		ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(event
